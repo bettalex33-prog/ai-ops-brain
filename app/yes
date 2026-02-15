@@ -1,0 +1,72 @@
+from datetime import datetime, timedelta
+
+
+def calculate_cash_flow(transactions):
+    total_income = 0
+    total_expense = 0
+
+    for tx in transactions:
+        if tx["type"] == "income":
+            total_income += tx["amount"]
+        elif tx["type"] == "expense":
+            total_expense += tx["amount"]
+
+    current_balance = total_income - total_expense
+
+    return {
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "current_balance": current_balance
+    }
+
+
+def estimate_burn_rate(transactions, window_days=30):
+    """
+    Calculates rolling burn rate over last X days
+    """
+
+    if not transactions:
+        return 0
+
+    # Convert dates
+    parsed_transactions = []
+    for tx in transactions:
+        tx_date = datetime.strptime(tx["date"], "%Y-%m-%d")
+        parsed_transactions.append({**tx, "parsed_date": tx_date})
+
+    # Find latest date
+    latest_date = max(tx["parsed_date"] for tx in parsed_transactions)
+
+    # Define window start
+    window_start = latest_date - timedelta(days=window_days)
+
+    expense_total = 0
+
+    for tx in parsed_transactions:
+        if tx["type"] == "expense" and tx["parsed_date"] >= window_start:
+            expense_total += tx["amount"]
+
+    daily_burn = expense_total / window_days
+
+    return round(daily_burn, 2)
+
+
+def estimate_runway(current_balance, daily_burn):
+    if daily_burn == 0:
+        return float("inf")
+
+    runway_days = current_balance / daily_burn
+    return round(runway_days, 2)
+
+
+def risk_level(runway_days):
+    if runway_days == float("inf"):
+        return "No Risk"
+
+    if runway_days < 7:
+        return "High Risk 🔴"
+    elif runway_days < 21:
+        return "Medium Risk 🟡"
+    else:
+        return "Low Risk 🟢"
+
