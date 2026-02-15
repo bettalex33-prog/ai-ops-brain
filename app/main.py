@@ -18,7 +18,7 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
 
-from engine import (
+from app.engine import (
     calculate_cash_flow,
     estimate_burn_rate,
     estimate_runway,
@@ -69,7 +69,7 @@ def analyze(data: TransactionRequest, _: str = Depends(verify_api_key)):
     }
 
 
-from engine import apply_scenario_modifiers
+from app.engine import apply_scenario_modifiers
 
 class RiskRequest(BaseModel):
     transactions: List[Transaction]
