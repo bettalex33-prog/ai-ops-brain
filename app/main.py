@@ -4,6 +4,8 @@ from typing import List
 import os
 from fastapi import Header, HTTPException, Depends
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
+
 
 def verify_api_key(x_api_key: str = Header(None)):
     if x_api_key is None:
@@ -28,6 +30,13 @@ from app.engine import (
 )
 
 app = FastAPI(title="AI Ops Brain API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all for now (demo)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class Transaction(BaseModel):
